@@ -1,0 +1,120 @@
+<!doctype html>
+<html>
+<head>
+  <title>jQtexter Demo</title>
+  <script type="text/javascript" charset="utf-8" src="jquery.js"></script>
+  <script type="text/javascript" charset="utf-8" src="jqtexter.js"></script>
+  <style type="text/css" media="screen">
+    body {
+      background: #f5f5f5;
+      color: #444;
+    }
+    small {
+      color: #3F4FA2;
+    }
+    pre {
+      padding: 10px;
+      font-family: Monospace;
+      font-size: 12px;
+      background: #382C26;
+      color: #C9BBAF;
+    }
+  </style>
+</head>
+
+<body style="margin:20px; font-family: helvetica neue, helvetica, arial, sans-serif; font-size: 14px;">  
+<div style="width: 700px; padding:0 30px 30px; margin: auto">
+  <h1>jqTexter</h1>
+  <p>
+    jQTexter is a jQuery plugin for formatting text that works with character indexes 
+    so you don't have to deal with DOM selection and range objects. 
+    It evens out browser inconsistencies by working with elements' text contents instead of DOM Nodes.
+  </p>
+  <p>
+    Unlike some other editors out there, jQTexter's formatting attemps to optimally distribute tags.
+    It will never leave tags of the same type next to each other or have tags overlap.
+    For instance, if you have some <strong>bold</strong> text and later you add some <em>italic</em> tags inside, you will get this:
+    <pre><code>&lt;b&gt;Some &lt;i&gt;italic&lt;/i&gt; and some more &lt;i&gt;italic&lt;/i&gt;&lt;/b&gt;</code></pre>
+    instead of this:
+    <pre><code>&lt;b&gt;Some &lt;/b&gt;&lt;i&gt;&lt;b&gt;italic&lt;/b&gt;&lt;/i&gt;&lt;b&gt; and some more &lt;/b&gt;&lt;i&gt;&lt;b&gt;italic&lt;/b&gt;&lt;/i&gt;</code></pre>
+  </p>
+    
+  <h3>Selection and formatting</h3>
+    
+  <p>Selections are described with a simple object like this:</p>
+  <pre><code>{ start: 5, length: 15 }</code></pre> 
+  <p>Text formatting is described with list of simple objects like this:</p>
+  <pre><code>{ B: [{start: 7, end: 33, attrs: {}}, {start: 65, end: 97, attrs: {}}],
+  I: [{start: 87, end: 117, attrs: {}}, {start: 225, end: 245, attrs: {}}],
+  A: [{start: 364, end: 397, attrs: {href: "http://example.com", target: "_blank"}}] }</code></pre> 
+  
+  <h3>Methods</h3>
+  <ul>
+    <li>textSelection( [<strong>selection</strong>] ) <small>gets/sets selection in an element</small></li>
+    <li>textFormat( [<strong>formatting</strong>, <strong>replacementText</strong>] ) <small>gets/sets formatting in an element</small></li>
+    <li>applyTag( <strong>selection</strong>, <strong>tagName</strong>, [<strong>attrs</strong>, <strong>remove</strong>] ) <small>applies (or removes) tagName to selection</small></li>
+    <li>getSelectedNodes() <small>returns a list of child nodes completely contained in selection</small></li>
+  </ul>
+  
+  <h3>Compatibility</h3>
+  <p>
+    jQtexter definitely works with IE 9+, Firefox 4+ and Chrome 12+. 
+    I'm not sure about other versions, but it requires the following APIs to be present:
+  </p>
+  <ul>
+    <li>window.getSelection()</li>
+    <li>selection.getRangeAt()</li>
+    <li>selection.anchorNode, selection.focusNode</li>
+    <li>HTML contentEditable attribute (required for actual editing)</li>
+  </ul>
+  
+  <h2>Demo</h2>
+  <p> Try to edit some text by clicking the buttons below.</p>
+  <div style="margin: auto">
+    <input type="button" value="B" id="bold">
+    <input type="button" value="I" id="italic">
+    <input type="button" value="U" id="underline">
+    <input type="button" value="SUB" id="subscript">
+    <input type="button" value="SUP" id="superscript">
+    <input type="button" value="Get Selection" id="selection">
+    <input type="button" value="Get Formatting" id="formatting">
+  </div>
+  <p id="testpar" contentEditable="true" style="background: #E9DBDF; padding: 15px"><strong>Lorem ipsum dolor sit amet</strong>, consectetur adipisicing elit, <strong>sed do eiusmod tempor </strong><em><strong>incididunt</strong> ut labore et dolore</em> magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex <em>ea commodo consequat</em>. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. <a href="http://example.com" target="_blank">Excepteur sint occaecat cupidatat</a> non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.</p>
+  <pre style="overflow: auto; min-height: 40px"><code id="results"></code></pre>
+</div>
+  
+<script type="text/javascript" charset="utf-8">
+  var p = $('#testpar');
+  var r = $('#results');
+    
+  function applyTag(tagName){
+    return function(){
+      var sel, fmt, rem, i, occ, tag;        
+      if(!(sel = p.textSelection())) {
+        return;
+      }
+      fmt = p.textFormat(); 
+      rem = false;
+      if(tag = fmt[tagName]) { // Find a continuous "tagName" section that wraps the selection
+        i = 0;
+        while(occ = tag[i++]) {
+          if(rem = (occ.start <= sel.start && occ.end >= sel.end)) {
+            break;
+          }
+        }
+      }
+      p.applyTag(sel, tagName, {}, rem);
+    }
+  }
+    
+  $('#selection').click(function(){ r.html(JSON.stringify(p.textSelection())); });
+  $('#formatting').click(function(){ r.html(JSON.stringify(p.textFormat())); });
+  $('#bold').click(applyTag('STRONG'));
+  $('#italic').click(applyTag('EM'));
+  $('#underline').click(applyTag('U'));
+  $('#subscript').click(applyTag('SUB'));
+  $('#superscript').click(applyTag('SUP'));
+    
+</script>
+</body>
+</html>
