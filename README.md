@@ -24,9 +24,9 @@ Text formatting is described with list of simple objects like this:
 
 ### Methods
 
-- `textSelection( [**selection**] )` gets/sets selection in an element
-- `textFormat( [**formatting**, **replacementText**] )` gets/sets formatting in an element
-- `applyTag( **selection**, **tagName**, [**attrs**, **remove**] )` applies (or removes) tagName to selection
+- `textSelection( [selection] )` gets/sets selection in an element
+- `textFormat( [formatting, replacementText] )` gets/sets formatting in an element
+- `applyTag( selection, tagName, [attrs, remove] )` applies (or removes) tagName to selection
 - `getSelectedNodes()` returns a list of child nodes completely contained in selection
 
 ### Compatibility
